@@ -64,6 +64,15 @@ Install on another machine with:
 omarchy plugin enable bog.desktop-icons
 ```
 
+## Publishing
+
+```bash
+gh auth login
+gh repo create omarchy-desktop-icons --public --source=. --remote=origin --push
+```
+
+Use `--private` instead of `--public` if you prefer a private repository.
+
 ## Notes
 
 - Desktop folder resolution uses XDG, but ignores a Desktop entry that points at
