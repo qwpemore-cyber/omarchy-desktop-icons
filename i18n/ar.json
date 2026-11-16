@@ -6,5 +6,6 @@
   "menu.refresh": "تحديث",
   "menu.openDesktop": "فتح مجلد سطح المكتب",
   "menu.openDesktopTerminal": "فتح سطح المكتب في الطرفية",
-  "menu.changeWallpaper": "تغيير الخلفية"
+  "menu.changeWallpaper": "تغيير الخلفية",
+  "open.failed": "لا يوجد تطبيق يستطيع فتح هذا الملف"
 }

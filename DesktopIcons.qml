@@ -79,16 +79,29 @@ Item {
   }
 
   function openPath(entry) {
-    if (!entry || !entry.path) return
+    if (!entry || !entry.path || openProc.running) return
+    var path = entry.path
     if (entry.isDesktop) {
       Quickshell.execDetached([
         "bash", "-c",
         'gio launch "$1" >/dev/null 2>&1 || xdg-open "$1" >/dev/null 2>&1',
-        "open", entry.path
+        "open", path
       ])
-    } else {
-      Quickshell.execDetached(["xdg-open", entry.path])
+      return
     }
+    // Flea is Omarchy's opener, so it resolves the same MIME defaults the file
+    // manager uses: text/plain goes to the configured editor (Neovim here),
+    // video/mp4 to VLC, and so on. Fall back to xdg-open without Flea.
+    openProc.path = path
+    openProc.isDir = entry.isDir === true
+    openProc.command = openProc.isDir
+      ? ["bash", "-c",
+        'if command -v flea >/dev/null 2>&1; then exec flea "$1"; else exec xdg-open "$1"; fi',
+        "open", path]
+      : ["bash", "-c",
+        'if command -v flea >/dev/null 2>&1; then exec flea --open "$1"; else exec xdg-open "$1"; fi',
+        "open", path]
+    openProc.running = true
   }
 
   function openInTerminal(path) {
@@ -211,6 +224,31 @@ Item {
     onExited: {
       root.refresh()
       if (root.selectedPath === trashProc.path) root.selectedPath = ""
+    }
+  }
+
+  // Flea reports why a launch failed: 3 means the path is really a directory,
+  // 4 asks its run card and 5 asks Open with. A desktop icon has no card, so
+  // those two hand the path to the system default instead.
+  Process {
+    id: openProc
+    property string path: ""
+    property bool isDir: false
+    onExited: function(exitCode, exitStatus) {
+      if (exitCode === 0) return
+      if (exitCode === 3) {
+        Quickshell.execDetached(["bash", "-c",
+          'if command -v flea >/dev/null 2>&1; then exec flea "$1"; else exec xdg-open "$1"; fi',
+          "open", openProc.path])
+        return
+      }
+      if (exitCode === 4 || exitCode === 5) {
+        Quickshell.execDetached(["xdg-open", openProc.path])
+        return
+      }
+      Quickshell.execDetached([
+        "omarchy-notification-send", strings.t("open.failed"), openProc.path
+      ])
     }
   }
 

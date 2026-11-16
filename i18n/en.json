@@ -6,5 +6,6 @@
   "menu.refresh": "Refresh",
   "menu.openDesktop": "Open Desktop Folder",
   "menu.openDesktopTerminal": "Open Desktop in Terminal",
-  "menu.changeWallpaper": "Change Wallpaper"
+  "menu.changeWallpaper": "Change Wallpaper",
+  "open.failed": "No application could open this file"
 }

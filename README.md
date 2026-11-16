@@ -16,6 +16,10 @@ omarchy hyprland workspace layout toggle
 - Top level of the Desktop folder as a grid of icons (folders first).
 - Image files show thumbnails; everything else gets a themed file-type icon.
 - Single click selects, double click opens, right click opens a small menu.
+- Double click hands the file to Flea (`flea --open`), so the same MIME defaults
+  as the file manager apply: `text/plain` opens the configured editor (Neovim by
+  default), `video/mp4` opens VLC, images open Loupe, PDFs open Omapdf, and
+  folders open in Flea. Without Flea it falls back to `xdg-open`.
 - File menu: open, open in terminal (folders), copy path, move to trash, refresh.
 - Empty-desktop menu: open Desktop folder, open it in a terminal, change
   wallpaper, refresh.
