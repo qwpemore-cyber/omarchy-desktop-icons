@@ -1,0 +1,10 @@
+{
+  "menu.open": "فتح",
+  "menu.openTerminal": "فتح في الطرفية",
+  "menu.copyPath": "نسخ المسار",
+  "menu.moveToTrash": "نقل إلى المهملات",
+  "menu.refresh": "تحديث",
+  "menu.openDesktop": "فتح مجلد سطح المكتب",
+  "menu.openDesktopTerminal": "فتح سطح المكتب في الطرفية",
+  "menu.changeWallpaper": "تغيير الخلفية"
+}

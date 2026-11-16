@@ -1,0 +1,10 @@
+{
+  "menu.open": "Open",
+  "menu.openTerminal": "Open in Terminal",
+  "menu.copyPath": "Copy Path",
+  "menu.moveToTrash": "Move to Trash",
+  "menu.refresh": "Refresh",
+  "menu.openDesktop": "Open Desktop Folder",
+  "menu.openDesktopTerminal": "Open Desktop in Terminal",
+  "menu.changeWallpaper": "Change Wallpaper"
+}

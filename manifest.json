@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "bog.desktop-icons",
+  "name": "Desktop Icons",
+  "version": "1.0.0",
+  "author": "bog",
+  "license": "MIT",
+  "description": "Shows the contents of your Desktop folder as icons on the desktop, with open, copy path and trash actions.",
+  "kinds": [
+    "service"
+  ],
+  "entryPoints": {
+    "service": "DesktopIcons.qml"
+  }
+}
