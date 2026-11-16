@@ -27,7 +27,8 @@ ARCHIVE_EXT = {
 DOC_EXT = {"doc", "docx", "odt", "rtf", "pages"}
 SHEET_EXT = {"xls", "xlsx", "ods", "csv", "tsv", "numbers"}
 SLIDE_EXT = {"ppt", "pptx", "odp", "key"}
-SCRIPT_EXT = {"sh", "bash", "zsh", "fish", "py", "js", "mjs", "ts", "rb", "pl", "lua", "php"}
+SHELL_EXT = {"sh", "bash", "zsh", "fish", "ksh", "csh", "tcsh", "dash"}
+SCRIPT_EXT = {"py", "js", "mjs", "ts", "rb", "pl", "lua", "php"}
 TEXT_EXT = {
     "txt", "md", "markdown", "log", "conf", "cfg", "ini", "json", "jsonc",
     "yaml", "yml", "toml", "xml", "html", "htm", "css", "scss", "sql", "nfo",
@@ -42,6 +43,7 @@ ICON_BY_GROUP = {
     "spreadsheet": "x-office-spreadsheet",
     "presentation": "x-office-presentation",
     "pdf": "application-pdf",
+    "shell": "application-x-shellscript",
     "script": "text-x-script",
     "text": "text-x-generic",
     "executable": "application-x-executable",
@@ -70,6 +72,8 @@ def group_for(extension, is_executable):
         return "pdf"
     if extension == "desktop":
         return "desktop"
+    if extension in SHELL_EXT:
+        return "shell"
     if extension in SCRIPT_EXT:
         return "script"
     if extension in TEXT_EXT:

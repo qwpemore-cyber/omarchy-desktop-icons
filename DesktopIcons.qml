@@ -137,17 +137,17 @@ Item {
   function menuFor(path, isDir) {
     var items = []
     if (path === "") {
-      items.push({ id: "openDesktop", label: strings.t("menu.openDesktop") })
-      items.push({ id: "openDesktopTerminal", label: strings.t("menu.openDesktopTerminal") })
-      items.push({ id: "changeWallpaper", label: strings.t("menu.changeWallpaper") })
-      items.push({ id: "refresh", label: strings.t("menu.refresh") })
+      items.push({ id: "openDesktop", label: strings.t("menu.openDesktop"), icon: "folder-open" })
+      items.push({ id: "openDesktopTerminal", label: strings.t("menu.openDesktopTerminal"), icon: "utilities-terminal" })
+      items.push({ id: "changeWallpaper", label: strings.t("menu.changeWallpaper"), icon: "preferences-desktop-wallpaper", separatorBefore: true })
+      items.push({ id: "refresh", label: strings.t("menu.refresh"), icon: "view-refresh", separatorBefore: true })
       return items
     }
-    items.push({ id: "open", label: strings.t("menu.open") })
-    if (isDir) items.push({ id: "openTerminal", label: strings.t("menu.openTerminal") })
-    items.push({ id: "copyPath", label: strings.t("menu.copyPath") })
-    items.push({ id: "trash", label: strings.t("menu.moveToTrash") })
-    items.push({ id: "refresh", label: strings.t("menu.refresh") })
+    items.push({ id: "open", label: strings.t("menu.open"), icon: isDir ? "folder-open" : "document-open" })
+    if (isDir) items.push({ id: "openTerminal", label: strings.t("menu.openTerminal"), icon: "utilities-terminal" })
+    items.push({ id: "copyPath", label: strings.t("menu.copyPath"), icon: "edit-copy" })
+    items.push({ id: "trash", label: strings.t("menu.moveToTrash"), icon: "user-trash", destructive: true, separatorBefore: true })
+    items.push({ id: "refresh", label: strings.t("menu.refresh"), icon: "view-refresh", separatorBefore: true })
     return items
   }
 
@@ -475,8 +475,10 @@ Item {
                 onClicked: function(mouse) {
                   win.closeMenu()
                   root.selectedPath = modelData.path
-                  if (mouse.button === Qt.RightButton)
-                    win.openMenu(modelData.path, modelData.isDir, mouse.x, mouse.y)
+                  if (mouse.button === Qt.RightButton) {
+                    var point = cellMouse.mapToItem(win.contentItem, mouse.x, mouse.y)
+                    win.openMenu(modelData.path, modelData.isDir, point.x, point.y)
+                  }
                 }
                 onDoubleClicked: function(mouse) {
                   if (mouse.button !== Qt.LeftButton) return
@@ -492,55 +494,116 @@ Item {
           id: contextMenu
           visible: win.menuOpen
           z: 100
-          width: 216
-          height: menuColumn.implicitHeight + 12
-          radius: 10
-          color: Util.alpha(Commons.Color.background, 0.97)
-          border.width: 1
-          border.color: Util.alpha(Commons.Color.accent, 0.35)
 
-          x: Math.max(6, Math.min(win.menuX, win.width - width - 6))
-          y: Math.max(6, Math.min(win.menuY, win.height - height - 6))
+          readonly property bool rtl: Commons.I18n.rightToLeft
+          readonly property int menuPadding: Math.max(6, Style.spacing.sm)
+          readonly property int menuRowHeight: Math.max(32, Style.spacing.popupRowHeight)
+          readonly property int menuIconSize: 16
+          readonly property int menuSeparatorGap: Style.spacing.sm
+
+          width: Math.max(236, Style.spacing.dropdownWidth)
+          height: menuColumn.implicitHeight + menuPadding * 2
+          radius: Style.cornerRadius
+          color: Commons.Color.menu.background
+          border.width: Style.normalBorderWidth
+          border.color: Commons.Color.menu.border
+
+          x: Math.max(menuPadding, Math.min(win.menuX + 2, win.width - width - menuPadding))
+          y: Math.max(menuPadding, Math.min(win.menuY + 2, win.height - height - menuPadding))
+
+          MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+          }
 
           Column {
             id: menuColumn
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 6
-            anchors.leftMargin: 6
-            anchors.rightMargin: 6
-            spacing: 2
+            anchors.topMargin: contextMenu.menuPadding
+            anchors.leftMargin: contextMenu.menuPadding
+            anchors.rightMargin: contextMenu.menuPadding
+            spacing: 0
 
             Repeater {
               model: win.menuEntries
 
-              delegate: Rectangle {
-                height: 34
-                width: menuColumn.width
-                radius: 6
-                color: rowMouse.containsMouse ? Util.alpha(Commons.Color.accent, 0.18) : "transparent"
+              delegate: Item {
+                id: menuRow
+                required property var modelData
+                required property int index
 
-                Text {
-                  anchors.verticalCenter: parent.verticalCenter
-                  anchors.left: parent.left
-                  anchors.right: parent.right
-                  anchors.leftMargin: 10
-                  anchors.rightMargin: 10
-                  textFormat: Text.PlainText
-                  text: modelData.label
-                  font.family: Style.font.family
-                  font.pixelSize: Style.font.body
-                  color: Commons.Color.foreground
-                  elide: Text.ElideRight
-                  horizontalAlignment: Commons.I18n.rightToLeft ? Text.AlignRight : Text.AlignLeft
+                readonly property bool destructive: modelData.destructive === true
+                readonly property bool hasSeparator: modelData.separatorBefore === true
+                readonly property int separatorBlock: hasSeparator ? contextMenu.menuSeparatorGap * 2 + 1 : 0
+
+                width: menuColumn.width
+                height: separatorBlock + contextMenu.menuRowHeight
+
+                Rectangle {
+                  id: rowSeparator
+                  visible: menuRow.hasSeparator
+                  y: contextMenu.menuSeparatorGap
+                  width: parent.width
+                  height: 1
+                  color: Util.alpha(Commons.Color.menu.text, 0.12)
                 }
 
-                MouseArea {
-                  id: rowMouse
-                  anchors.fill: parent
-                  hoverEnabled: true
-                  onClicked: win.runMenuAction(modelData.id)
+                Rectangle {
+                  id: rowBody
+                  y: menuRow.separatorBlock
+                  width: parent.width
+                  height: contextMenu.menuRowHeight
+                  radius: Math.max(0, Style.cornerRadius - 4)
+                  color: rowMouse.containsMouse
+                    ? (menuRow.destructive
+                        ? Util.alpha(Commons.Color.urgent, 0.16)
+                        : Commons.Color.menu.selectedBackground)
+                    : "transparent"
+
+                  Behavior on color { ColorAnimation { duration: 90 } }
+
+                  Image {
+                    id: rowIcon
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: contextMenu.rtl ? undefined : parent.left
+                    anchors.right: contextMenu.rtl ? parent.right : undefined
+                    anchors.leftMargin: Style.spacing.controlPaddingX
+                    anchors.rightMargin: Style.spacing.controlPaddingX
+                    width: contextMenu.menuIconSize
+                    height: width
+                    source: modelData.icon ? Quickshell.iconPath(modelData.icon, true) : ""
+                    sourceSize.width: width
+                    sourceSize.height: height
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                  }
+
+                  Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: contextMenu.rtl ? parent.left : rowIcon.right
+                    anchors.right: contextMenu.rtl ? rowIcon.left : parent.right
+                    anchors.leftMargin: contextMenu.rtl ? Style.spacing.controlPaddingX : Style.spacing.controlGap
+                    anchors.rightMargin: contextMenu.rtl ? Style.spacing.controlGap : Style.spacing.controlPaddingX
+                    textFormat: Text.PlainText
+                    text: modelData.label
+                    font.family: Style.font.family
+                    font.pixelSize: Style.font.body
+                    color: menuRow.destructive
+                      ? Commons.Color.urgent
+                      : (rowMouse.containsMouse ? Commons.Color.menu.selectedText : Commons.Color.menu.text)
+                    elide: Text.ElideRight
+                    horizontalAlignment: contextMenu.rtl ? Text.AlignRight : Text.AlignLeft
+                  }
+
+                  MouseArea {
+                    id: rowMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: win.runMenuAction(modelData.id)
+                  }
                 }
               }
             }
